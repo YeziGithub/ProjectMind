@@ -94,7 +94,7 @@ public struct ProjectFileSequence: AsyncSequence, Sendable {
 
 // MARK: - Internal State
 
-private final class ScanState: @unchecked Sendable {
+private final class ScanState {
   let root: URL
   let configuration: ScannerConfiguration
   var enumerator: FileManager.DirectoryEnumerator?
