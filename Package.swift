@@ -52,7 +52,8 @@ let package = Package(
 
         // Layer 3 — CLI entry point (command parsing only)
         .executableTarget(
-            name: "ProjectMindCLI"
+            name: "ProjectMindCLI",
+            dependencies: ["Core", "Scanner", "Database"]
         ),
 
         // Tests
@@ -67,6 +68,9 @@ let package = Package(
         .testTarget(name: "DatabaseTests", dependencies: ["Database"]),
         .testTarget(name: "GitTests", dependencies: ["Git"]),
         .testTarget(name: "QueryTests", dependencies: ["Query"]),
-        .testTarget(name: "ProjectMindCLITests", dependencies: ["ProjectMindCLI"]),
+        .testTarget(
+            name: "ProjectMindCLITests",
+            dependencies: ["ProjectMindCLI", "Core", "Database"]
+        ),
     ]
 )
