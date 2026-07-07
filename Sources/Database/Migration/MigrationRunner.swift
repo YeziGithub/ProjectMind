@@ -3,7 +3,7 @@ import Foundation
 import SQLite3
 
 /// Applies pending database migrations in version order.
-struct MigrationRunner: Sendable {
+struct MigrationRunner {
     private let connection: OpaquePointer
     private let dateFormatter: ISO8601DateFormatter
 
