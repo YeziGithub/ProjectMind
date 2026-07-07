@@ -15,6 +15,7 @@ struct MigrationRunner {
 
     func run(migrations: [any DatabaseMigration]) throws {
         let sorted = migrations.sorted { $0.version < $1.version }
+        try execute(SQLStatements.createSchemaMigrationsTable)
         let applied = try fetchAppliedVersions()
 
         for migration in sorted {
