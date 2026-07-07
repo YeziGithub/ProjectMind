@@ -6,6 +6,7 @@ public protocol DatabaseProtocol: Sendable {
     func close() async throws
     func createTables() async throws
     func insertFile(_ file: ProjectFile) async throws -> Int64
+    func upsertFile(_ file: ProjectFile) async throws
     func updateFile(id: Int64, file: ProjectFile) async throws
     func deleteFile(id: Int64) async throws
     func query(_ query: FileQuery) async throws -> [StoredFile]

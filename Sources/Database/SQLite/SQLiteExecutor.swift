@@ -46,6 +46,22 @@ struct SQLiteExecutor {
         return sqlite3_last_insert_rowid(connection)
     }
 
+    func upsertFile(_ file: ProjectFile) throws {
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(connection, SQLStatements.upsertFile, -1, &statement, nil) == SQLITE_OK,
+              let statement
+        else {
+            throw ProjectMindError.databaseExecuteFailed(underlying: lastErrorMessage())
+        }
+        defer { sqlite3_finalize(statement) }
+
+        guard bind(file, to: statement) == SQLITE_OK,
+              sqlite3_step(statement) == SQLITE_DONE
+        else {
+            throw ProjectMindError.databaseExecuteFailed(underlying: lastErrorMessage())
+        }
+    }
+
     func updateFile(id: Int64, file: ProjectFile) throws {
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(connection, SQLStatements.updateFile, -1, &statement, nil) == SQLITE_OK,
@@ -55,12 +71,7 @@ struct SQLiteExecutor {
         }
         defer { sqlite3_finalize(statement) }
 
-        let modifiedDate = dateFormatter.string(from: file.modifiedDate)
-        guard bindText(file.path, to: statement, at: 1) == SQLITE_OK,
-              bindText(file.filename, to: statement, at: 2) == SQLITE_OK,
-              bindText(file.ext, to: statement, at: 3) == SQLITE_OK,
-              sqlite3_bind_int64(statement, 4, file.size) == SQLITE_OK,
-              bindText(modifiedDate, to: statement, at: 5) == SQLITE_OK,
+        guard bind(file, to: statement) == SQLITE_OK,
               sqlite3_bind_int64(statement, 6, id) == SQLITE_OK
         else {
             throw ProjectMindError.databaseExecuteFailed(underlying: lastErrorMessage())
@@ -158,6 +169,20 @@ struct SQLiteExecutor {
     private enum Binding {
         case text(String)
         case int(Int64)
+    }
+
+    @discardableResult
+    private func bind(_ file: ProjectFile, to statement: OpaquePointer) -> Int32 {
+        let modifiedDate = dateFormatter.string(from: file.modifiedDate)
+        guard bindText(file.path, to: statement, at: 1) == SQLITE_OK,
+              bindText(file.filename, to: statement, at: 2) == SQLITE_OK,
+              bindText(file.ext, to: statement, at: 3) == SQLITE_OK,
+              sqlite3_bind_int64(statement, 4, file.size) == SQLITE_OK,
+              bindText(modifiedDate, to: statement, at: 5) == SQLITE_OK
+        else {
+            return SQLITE_ERROR
+        }
+        return SQLITE_OK
     }
 
     private func bind(_ bindings: [Binding], to statement: OpaquePointer) throws {

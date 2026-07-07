@@ -49,6 +49,16 @@ enum SQLStatements {
         VALUES (?, ?, ?, ?, ?);
         """
 
+    static let upsertFile = """
+        INSERT INTO files (path, filename, ext, size, modified_date)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(path) DO UPDATE SET
+            filename = excluded.filename,
+            ext = excluded.ext,
+            size = excluded.size,
+            modified_date = excluded.modified_date;
+        """
+
     static let updateFile = """
         UPDATE files
         SET path = ?, filename = ?, ext = ?, size = ?, modified_date = ?

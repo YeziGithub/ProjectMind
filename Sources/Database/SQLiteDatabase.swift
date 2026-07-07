@@ -46,6 +46,11 @@ public actor SQLiteDatabase: DatabaseProtocol {
         return try SQLiteExecutor(connection: connection).insertFile(file)
     }
 
+    public func upsertFile(_ file: ProjectFile) async throws {
+        let connection = try requireConnection()
+        try SQLiteExecutor(connection: connection).upsertFile(file)
+    }
+
     public func updateFile(id: Int64, file: ProjectFile) async throws {
         let connection = try requireConnection()
         try SQLiteExecutor(connection: connection).updateFile(id: id, file: file)

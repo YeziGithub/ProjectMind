@@ -46,6 +46,59 @@ struct SQLiteDatabaseTests {
         }
     }
 
+    @Test("upsert inserts new file")
+    func upsertInsertsNewFile() async throws {
+        try await withDatabase { database in
+            try await database.createTables()
+            let file = sampleFile(name: "UpsertNew", size: 300)
+
+            try await database.upsertFile(file)
+
+            let results = try await database.query(FileQuery(path: file.path))
+            #expect(results.count == 1)
+            #expect(results.first?.filename == "UpsertNew")
+            #expect(results.first?.size == 300)
+        }
+    }
+
+    @Test("upsert updates existing path")
+    func upsertUpdatesExistingPath() async throws {
+        try await withDatabase { database in
+            try await database.createTables()
+            let original = sampleFile(name: "UpsertExisting", size: 100)
+            let updated = ProjectFile(
+                path: original.path,
+                filename: "Renamed",
+                ext: "swift",
+                size: 999,
+                modifiedDate: Date(timeIntervalSince1970: 1_800_000_000)
+            )
+
+            try await database.upsertFile(original)
+            try await database.upsertFile(updated)
+
+            let results = try await database.query(FileQuery(path: original.path))
+            #expect(results.count == 1)
+            #expect(results.first?.filename == "Renamed")
+            #expect(results.first?.size == 999)
+            #expect(results.first?.modifiedDate == updated.modifiedDate)
+        }
+    }
+
+    @Test("repeated upsert does not duplicate rows")
+    func repeatedUpsertDoesNotDuplicateRows() async throws {
+        try await withDatabase { database in
+            try await database.createTables()
+            let file = sampleFile(name: "RepeatUpsert", size: 100)
+
+            try await database.upsertFile(file)
+            try await database.upsertFile(file)
+
+            let results = try await database.query(FileQuery(path: file.path))
+            #expect(results.count == 1)
+        }
+    }
+
     @Test("deletes file")
     func deleteFile() async throws {
         try await withDatabase { database in
