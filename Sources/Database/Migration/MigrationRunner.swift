@@ -3,7 +3,7 @@ import Foundation
 import SQLite3
 
 /// Applies pending database migrations in version order.
-struct MigrationRunner: Sendable {
+struct MigrationRunner {
     private let connection: OpaquePointer
     private let dateFormatter: ISO8601DateFormatter
 
@@ -15,6 +15,7 @@ struct MigrationRunner: Sendable {
 
     func run(migrations: [any DatabaseMigration]) throws {
         let sorted = migrations.sorted { $0.version < $1.version }
+        try execute(SQLStatements.createSchemaMigrationsTable)
         let applied = try fetchAppliedVersions()
 
         for migration in sorted {

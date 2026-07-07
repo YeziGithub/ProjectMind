@@ -3,7 +3,7 @@ import Foundation
 import SQLite3
 
 /// Low-level SQLite execution helpers shared by database operations.
-struct SQLiteExecutor: Sendable {
+struct SQLiteExecutor {
     private let connection: OpaquePointer
     private let dateFormatter: ISO8601DateFormatter
 

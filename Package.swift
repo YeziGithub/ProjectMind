@@ -58,7 +58,11 @@ let package = Package(
         // Tests
         .testTarget(name: "CommonTests", dependencies: ["Common"]),
         .testTarget(name: "CoreTests", dependencies: ["Core"]),
-        .testTarget(name: "ScannerTests", dependencies: ["Scanner"]),
+        .testTarget(
+            name: "ScannerTests",
+            dependencies: ["Scanner"],
+            exclude: ["Fixtures"]
+        ),
         .testTarget(name: "ParserTests", dependencies: ["Parser"]),
         .testTarget(name: "DatabaseTests", dependencies: ["Database"]),
         .testTarget(name: "GitTests", dependencies: ["Git"]),
