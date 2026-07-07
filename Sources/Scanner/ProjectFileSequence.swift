@@ -8,23 +8,19 @@ public struct ProjectFileSequence: AsyncSequence, Sendable {
 
   private let root: URL
   private let configuration: ScannerConfiguration
-  private let fileManager: FileManager
 
   public init(
     root: URL,
-    configuration: ScannerConfiguration = .default,
-    fileManager: FileManager = .default
+    configuration: ScannerConfiguration = .default
   ) {
     self.root = root.standardizedFileURL
     self.configuration = configuration
-    self.fileManager = fileManager
   }
 
   public func makeAsyncIterator() -> Iterator {
     Iterator(
       root: root,
-      configuration: configuration,
-      fileManager: fileManager
+      configuration: configuration
     )
   }
 
@@ -34,13 +30,11 @@ public struct ProjectFileSequence: AsyncSequence, Sendable {
 
     init(
       root: URL,
-      configuration: ScannerConfiguration,
-      fileManager: FileManager
+      configuration: ScannerConfiguration
     ) {
       state = ScanState(
         root: root,
-        configuration: configuration,
-        fileManager: fileManager
+        configuration: configuration
       )
     }
 
@@ -103,20 +97,18 @@ public struct ProjectFileSequence: AsyncSequence, Sendable {
 private final class ScanState: @unchecked Sendable {
   let root: URL
   let configuration: ScannerConfiguration
-  let fileManager: FileManager
   var enumerator: FileManager.DirectoryEnumerator?
 
   init(
     root: URL,
-    configuration: ScannerConfiguration,
-    fileManager: FileManager
+    configuration: ScannerConfiguration
   ) {
     self.root = root
     self.configuration = configuration
-    self.fileManager = fileManager
   }
 
   func prepare() throws {
+    let fileManager = FileManager.default
     var isDirectory: ObjCBool = false
     guard fileManager.fileExists(atPath: root.path, isDirectory: &isDirectory) else {
       throw ProjectMindError.projectNotFound(path: root.path)
