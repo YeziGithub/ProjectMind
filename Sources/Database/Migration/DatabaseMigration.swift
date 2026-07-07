@@ -22,3 +22,23 @@ public struct InitialMigration: DatabaseMigration, Sendable {
         ]
     }
 }
+
+/// Adds parsed source files, symbols, and import references.
+public struct SourceIndexMigration: DatabaseMigration, Sendable {
+    public let version = 2
+
+    public init() {}
+
+    public var statements: [String] {
+        [
+            SQLStatements.createSourceFilesTable,
+            SQLStatements.createSourceSymbolsTable,
+            SQLStatements.createImportReferencesTable,
+            SQLStatements.createSourceSymbolsNameIndex,
+            SQLStatements.createSourceSymbolsKindIndex,
+            SQLStatements.createSourceSymbolsFilePathIndex,
+            SQLStatements.createImportReferencesFilePathIndex,
+            SQLStatements.createImportReferencesModuleIndex,
+        ]
+    }
+}

@@ -53,7 +53,7 @@ let package = Package(
         // Layer 3 — CLI entry point (command parsing only)
         .executableTarget(
             name: "ProjectMindCLI",
-            dependencies: ["Core", "Scanner", "Database"]
+            dependencies: ["Core", "Scanner", "Parser", "Database", "Git"]
         ),
 
         // Tests
