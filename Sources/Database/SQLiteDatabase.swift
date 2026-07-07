@@ -7,7 +7,7 @@ public actor SQLiteDatabase: DatabaseProtocol {
     private var connection: OpaquePointer?
     private let migrations: [any DatabaseMigration]
 
-    public init(migrations: [any DatabaseMigration] = [InitialMigration()]) {
+    public init(migrations: [any DatabaseMigration] = [InitialMigration(), SourceIndexMigration()]) {
         self.migrations = migrations
     }
 
@@ -64,6 +64,44 @@ public actor SQLiteDatabase: DatabaseProtocol {
     public func query(_ query: FileQuery) async throws -> [StoredFile] {
         let connection = try requireConnection()
         return try SQLiteExecutor(connection: connection).query(query)
+    }
+
+    public func upsertSourceFile(_ sourceFile: SourceFile) async throws {
+        let connection = try requireConnection()
+        let executor = SQLiteExecutor(connection: connection)
+
+        try executor.execute(SQLStatements.beginTransaction)
+        do {
+            try executor.upsertSourceFile(sourceFile, parserKind: .swiftSyntax)
+            try executor.execute(SQLStatements.commitTransaction)
+        } catch {
+            try? executor.execute(SQLStatements.rollbackTransaction)
+            throw error
+        }
+    }
+
+    public func querySymbols(_ query: SymbolQuery) async throws -> [SourceSymbol] {
+        let connection = try requireConnection()
+        return try SQLiteExecutor(connection: connection).querySymbols(query)
+    }
+
+    public func queryImports(filePath: String?) async throws -> [ImportReference] {
+        let connection = try requireConnection()
+        return try SQLiteExecutor(connection: connection).queryImports(filePath: filePath)
+    }
+
+    public func deleteSourceFile(filePath: String) async throws {
+        let connection = try requireConnection()
+        let executor = SQLiteExecutor(connection: connection)
+
+        try executor.execute(SQLStatements.beginTransaction)
+        do {
+            try executor.deleteSourceFile(filePath: filePath)
+            try executor.execute(SQLStatements.commitTransaction)
+        } catch {
+            try? executor.execute(SQLStatements.rollbackTransaction)
+            throw error
+        }
     }
 
     public func transaction<T: Sendable>(

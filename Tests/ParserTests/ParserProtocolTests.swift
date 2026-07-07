@@ -30,7 +30,7 @@ struct ParserProtocolTests {
 
     @Test("stub parser returns not implemented")
     func notImplemented() async {
-        let parser = factory.makeParser(kind: .swiftSyntax)
+        let parser = factory.makeParser(kind: .sourceKit)
         await #expect(throws: ProjectMindError.self) {
             _ = try await parser.parse(file: file)
         }
